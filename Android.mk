@@ -121,7 +121,7 @@ LOCAL_STATIC_JAVA_LIBRARIES := \
 	libbackup \
 	legacy-test \
 	libphonenumber \
-	volley \
+	volley
 
 LOCAL_STATIC_ANDROID_LIBRARIES := \
 	android-support-core-ui \
