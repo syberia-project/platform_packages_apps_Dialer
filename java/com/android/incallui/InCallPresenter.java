@@ -18,10 +18,12 @@ package com.android.incallui;
 
 import android.content.Context;
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.graphics.Point;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Trace;
+import android.preference.PreferenceManager;
 import android.support.annotation.MainThread;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
@@ -85,7 +87,8 @@ import java.util.concurrent.atomic.AtomicBoolean;
  * presenters that want to listen in on the in-call state changes. TODO: This class has become more
  * of a state machine at this point. Consider renaming.
  */
-public class InCallPresenter implements CallList.Listener, AudioModeProvider.AudioModeListener {
+public class InCallPresenter implements CallList.Listener, AudioModeProvider.AudioModeListener,
+        AccelerometerListener.ChangeListener {
   private static final String PIXEL2017_SYSTEM_FEATURE =
       "com.google.android.feature.PIXEL_2017_EXPERIENCE";
 
@@ -187,6 +190,7 @@ public class InCallPresenter implements CallList.Listener, AudioModeProvider.Aud
       };
   private InCallState inCallState = InCallState.NO_CALLS;
   private ProximitySensor proximitySensor;
+  private AccelerometerListener mAccelerometerListener;
   private final PseudoScreenState pseudoScreenState = new PseudoScreenState();
   private boolean serviceConnected;
   private InCallCameraManager inCallCameraManager;
@@ -355,6 +359,7 @@ public class InCallPresenter implements CallList.Listener, AudioModeProvider.Aud
 
     this.proximitySensor = proximitySensor;
     addListener(this.proximitySensor);
+    mAccelerometerListener = new AccelerometerListener(context, this);
 
     if (themeColorManager == null) {
       themeColorManager =
@@ -763,6 +768,10 @@ public class InCallPresenter implements CallList.Listener, AudioModeProvider.Aud
     LogUtil.d(
         "InCallPresenter.onCallListChange", "onCallListChange newState changed to " + newState);
 
+    if (!newState.isIncoming() && mAccelerometerListener != null) {
+        mAccelerometerListener.enable(false);
+    }
+
     // Set the new state before announcing it to the world
     LogUtil.i(
         "InCallPresenter.onCallListChange",
@@ -795,6 +804,10 @@ public class InCallPresenter implements CallList.Listener, AudioModeProvider.Aud
     LogUtil.i(
         "InCallPresenter.onIncomingCall", "Phone switching state: " + oldState + " -> " + newState);
     inCallState = newState;
+
+    if (newState.isIncoming() && mAccelerometerListener != null) {
+        mAccelerometerListener.enable(true);
+    }
 
     Trace.beginSection("listener.onIncomingCall");
     for (IncomingCallListener listener : incomingCallListeners) {
@@ -873,6 +886,22 @@ public class InCallPresenter implements CallList.Listener, AudioModeProvider.Aud
   private boolean isSecretCode(@Nullable String number) {
     return number != null
         && (number.length() <= 8 || number.startsWith("*#*#") || number.endsWith("#*#*"));
+  }
+
+  public void onOrientationChanged(int orientation) {
+      // ignored
+  }
+
+  @Override
+  public void onDeviceFlipped(boolean faceDown) {
+      if (!faceDown) {
+          return;
+      }
+
+      SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(context);
+      if (prefs.getBoolean("button_smart_mute", false)) {
+          TelecomUtil.silenceRinger(context);
+      }
   }
 
   /** Given the call list, return the state in which the in-call screen should be. */
@@ -1153,6 +1182,9 @@ public class InCallPresenter implements CallList.Listener, AudioModeProvider.Aud
     // (1) Attempt to answer a call
     if (incomingCall != null) {
       incomingCall.answer(VideoProfile.STATE_AUDIO_ONLY);
+      if (mAccelerometerListener != null) {
+          mAccelerometerListener.enable(false);
+      }
       return true;
     }
 
@@ -1458,6 +1490,11 @@ public class InCallPresenter implements CallList.Listener, AudioModeProvider.Aud
         proximitySensor.tearDown();
       }
       proximitySensor = null;
+
+      if (mAccelerometerListener != null) {
+          mAccelerometerListener.enable(false);
+          mAccelerometerListener = null;
+      }
 
       if (statusBarNotifier != null) {
         removeListener(statusBarNotifier);
