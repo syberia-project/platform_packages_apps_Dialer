@@ -31,4 +31,10 @@
     <string name="auto_answer_delay_title">Autoanswer delay</string>
     <string name="auto_answer_dialog_title">Autoanswer delay in (ms)</string>
     <string name="auto_answer_delay_summary">Autoanswer will be activated in <xliff:g id="number">%d</xliff:g> ms</string>
+
+    <string name="incall_enable_dnd_title">Enable Do Not Disturb during calls</string>
+    <string name="incall_dnd_dialog_message">In order to enable Do Not Disturb, the Phone app needs to be granted the permission to control the Do Not Disturb status.\nPlease allow it.</string>
+    <string name="allow">Allow</string>
+    <string name="deny">Deny</string>
+
 </resources>
