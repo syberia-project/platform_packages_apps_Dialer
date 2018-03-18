@@ -51,4 +51,10 @@
     <string name="fullscreen_caller_photo_summary">Отображать полноэкранное фото во входящих и исходящих звонках</string>
     <string name="fullscreen_caller_photo_message">Для применения необходимо перезапустить приложение</string>
 
+    <!--Do Not Disturb during calls -->
+    <string name="incall_enable_dnd_title">Включить функцию «Не беспокоить» во время звонков</string>
+    <string name="incall_dnd_dialog_message">Чтобы включить функцию «Не беспокоить», приложению «Телефон» должно быть предоставлено разрешение на управление состоянием «Не беспокоить».\nПожалуйста предоставьте его.</string>
+    <string name="allow">Разрешить</string>
+    <string name="deny">Запретить</string>
+
 </resources>
