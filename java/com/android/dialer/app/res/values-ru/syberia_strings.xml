@@ -46,4 +46,9 @@
     <string name="smart_mute_title">Отключение звука</string>
     <string name="smart_mute_summary">Отключить звук входящего вызова переворотом устройства</string>
 
+    <string name="other_settings_label">Другие настройки</string>
+    <string name="fullscreen_caller_photo_title">Полноэкранное фото</string>
+    <string name="fullscreen_caller_photo_summary">Отображать полноэкранное фото во входящих и исходящих звонках</string>
+    <string name="fullscreen_caller_photo_message">Для применения необходимо перезапустить приложение</string>
+
 </resources>
