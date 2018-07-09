@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
-<!-- Copyright (C) 2016 The Android Open Source Project
+<!-- Copyright (C) 2016 The CyanogenMod Project
 
      Licensed under the Apache License, Version 2.0 (the "License");
      you may not use this file except in compliance with the License.
@@ -13,17 +13,14 @@
      See the License for the specific language governing permissions and
      limitations under the License.
 -->
+<vector xmlns:android="http://schemas.android.com/apk/res/android"
+    android:width="24dp"
+    android:height="24dp"
+    android:viewportWidth="48"
+    android:viewportHeight="48">
 
-<paths xmlns:tools="http://schemas.android.com/tools"
-    tools:ignore="UnusedResources">
-  <!-- Offer access to files under Context.getCacheDir() -->
-  <cache-path name="my_cache"/>
-  <!-- Offer access to voicemail folder under Context.getFilesDir() -->
-  <files-path
-    name="voicemails"
-    path="voicemails/"/>
-  <!-- Offer access to saved call recordings -->
-  <external-path
-    name="recordings"
-    path="CallRecordings/"/>
-</paths>
+    <path
+        android:fillColor="@color/call_log_icon_tint"
+        android:pathData="M 21,30.75 L 30,24 21,17.25 21,30.75 Z M 24,9 C 15.7125,9 9,15.7125 9,24 9,32.2875 15.7125,39 24,39 32.2875,39 39,32.2875 39,24 39,15.7125 32.2875,9 24,9 Z m 0,27 c -6.615,0 -12,-5.385 -12,-12 0,-6.615 5.385,-12 12,-12 6.615,0 12,5.385 12,12 0,6.615 -5.385,12 -12,12 z" />
+</vector>
+
