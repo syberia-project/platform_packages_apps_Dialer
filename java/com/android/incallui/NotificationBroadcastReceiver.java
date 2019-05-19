@@ -20,6 +20,7 @@ import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
 import android.os.Build.VERSION_CODES;
+import android.provider.Settings;
 import android.support.annotation.RequiresApi;
 import android.telecom.CallAudioState;
 import android.telecom.VideoProfile;
@@ -72,9 +73,9 @@ public class NotificationBroadcastReceiver extends BroadcastReceiver {
 
     // TODO: Commands of this nature should exist in the CallList.
     if (action.equals(ACTION_ANSWER_VIDEO_INCOMING_CALL)) {
-      answerIncomingCall(VideoProfile.STATE_BIDIRECTIONAL);
+      answerIncomingCall(context, VideoProfile.STATE_BIDIRECTIONAL);
     } else if (action.equals(ACTION_ANSWER_VOICE_INCOMING_CALL)) {
-      answerIncomingCall(VideoProfile.STATE_AUDIO_ONLY);
+      answerIncomingCall(context, VideoProfile.STATE_AUDIO_ONLY);
     } else if (action.equals(ACTION_DECLINE_INCOMING_CALL)) {
       Logger.get(context)
           .logImpression(DialerImpression.Type.REJECT_INCOMING_CALL_FROM_NOTIFICATION);
@@ -140,14 +141,24 @@ public class NotificationBroadcastReceiver extends BroadcastReceiver {
     }
   }
 
-  private void answerIncomingCall(int videoState) {
+  private void answerIncomingCall(Context context, int videoState) {
     CallList callList = InCallPresenter.getInstance().getCallList();
+    boolean gamingModeOn = Settings.System.getInt(context.getContentResolver(),
+                    Settings.System.ENABLE_GAMING_MODE, 1) == 1;
+    boolean loudspeakerForCall = Settings.System.getInt(context.getContentResolver(),
+                    Settings.System.GAMING_MODE_SPEAKER_IN_CALL_TOGGLE, 1) == 1;
     if (callList == null) {
       StatusBarNotifier.clearAllCallNotifications();
       LogUtil.e("NotificationBroadcastReceiver.answerIncomingCall", "call list is empty");
     } else {
       DialerCall call = callList.getIncomingCall();
-      if (call != null) {
+      if (call != null && gamingModeOn) {
+        call.answer(videoState);
+        StatusBarNotifier.clearAllCallNotifications();
+            if (loudspeakerForCall) {
+                TelecomAdapter.getInstance().setAudioRoute(CallAudioState.ROUTE_SPEAKER);
+            }
+      } else if (call != null) {
         call.answer(videoState);
         InCallPresenter.getInstance()
             .showInCall(false /* showDialpad */, false /* newOutgoingCall */);
