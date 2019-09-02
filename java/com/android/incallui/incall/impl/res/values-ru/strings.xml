@@ -30,4 +30,7 @@
     <string name="a11y_description_incall_label_manage_content" msgid="8298638893449287602">"Управление абонентами"</string>
     <string name="incall_label_swap" msgid="10458642864243507">"Переключить"</string>
     <string name="incall_note_sent" msgid="4524130323127388367">"Сообщение отправлено"</string>
+    <!-- Button shown during a call with a multi-SIM device to hang up and call with the other SIM
+     instead. [CHAR LIMIT=12] -->
+  <string name="incall_label_swap_sim">Сменить SIM-карту</string>
 </resources>

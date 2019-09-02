@@ -18,4 +18,6 @@
   <string name="onscreenCallRecordingText">Запись разговора - <xliff:g id="duration" example="00:10">%1$s</xliff:g></string>
   <string name="onscreenStopCallRecordText">Остановить запись</string>
   <string name="recording_time_text">Запись</string>
+  <!-- The "label" of the in-call Notification for an incoming ringing call on a device with multiple SIMs. [CHAR LIMIT=60] -->
+  <string name="notification_incoming_call_mutli_sim">Входящий звонок через <xliff:g id="sim_label" example="SIM 1">%1$s</xliff:g></string>
 </resources>

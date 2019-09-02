@@ -33,4 +33,5 @@
     <string name="incall_content_description_swap_video" msgid="297943299827908998">"Включить/выключить камеру"</string>
     <string name="incall_label_speaker" msgid="1814254833253409394">"Динамик"</string>
     <string name="incall_label_audio" msgid="5923781170533336820">"Звук"</string>
+    <string name="incall_content_description_swap_sim">Сменить SIM-карту</string>
 </resources>
