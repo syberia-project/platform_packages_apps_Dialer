@@ -18,7 +18,6 @@ package com.android.dialer.app.settings;
 import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
-import android.hardware.SensorManager;
 import android.net.Uri;
 import android.os.Build.VERSION;
 import android.os.Build.VERSION_CODES;
@@ -45,9 +44,6 @@ import com.android.dialer.proguard.UsedByReflection;
 import com.android.dialer.util.PermissionsUtil;
 import com.android.dialer.voicemail.settings.VoicemailSettingsFragment;
 import com.android.voicemail.VoicemailClient;
-
-import static android.hardware.Sensor.TYPE_PROXIMITY;
-
 import java.util.List;
 
 /** Activity for dialer settings. */
@@ -110,13 +106,6 @@ public class DialerSettingsActivity extends AppCompatPreferenceActivity {
     soundSettingsHeader.fragment = SoundSettingsFragment.class.getName();
     soundSettingsHeader.id = R.id.settings_header_sounds_and_vibration;
     target.add(soundSettingsHeader);
-
-    if (showSensorOptions()) {
-      Header sensorSettingsHeader = new Header();
-      sensorSettingsHeader.titleRes = R.string.sensor_settings_titile;
-      sensorSettingsHeader.fragment = SensorSettingsFragment.class.getName();
-      target.add(sensorSettingsHeader);
-    }
 
     Header quickResponseSettingsHeader = new Header();
     Intent quickResponseSettingsIntent =
@@ -340,11 +329,6 @@ public class DialerSettingsActivity extends AppCompatPreferenceActivity {
   /** @return Whether the current user is the primary user. */
   private boolean isPrimaryUser() {
     return getSystemService(UserManager.class).isSystemUser();
-  }
-
-  private boolean showSensorOptions() {
-    SensorManager sm = (SensorManager) this.getSystemService(Context.SENSOR_SERVICE);
-    return sm.getDefaultSensor(TYPE_PROXIMITY) != null;
   }
 
   /**
