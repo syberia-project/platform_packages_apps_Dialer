@@ -30,8 +30,6 @@ import android.hardware.SensorEvent;
 import android.hardware.SensorEventListener;
 import android.hardware.SensorManager;
 import android.os.Handler;
-import android.pocket.IPocketCallback;
-import android.pocket.PocketManager;
 import android.provider.Settings;
 import com.android.incallui.call.TelecomAdapter;
 import com.android.dialer.common.LogUtil;
@@ -88,18 +86,6 @@ public class ProximitySensor
   private final Handler handler = new Handler();
   private final Handler handlerAnswer = new Handler();
 
-
-  private PocketManager mPocketManager;
-  private boolean mIsDeviceInPocket;
-  private final IPocketCallback mPocketCallback = new IPocketCallback.Stub() {
-    @Override
-    public void onStateChanged(boolean isDeviceInPocket, int reason) {
-        if (reason == PocketManager.REASON_SENSOR) {
-                mIsDeviceInPocket = isDeviceInPocket;
-        }
-     }
-    };
-
    private final Runnable activateSpeaker = new Runnable() {
     @Override
     public void run() {
@@ -122,11 +108,6 @@ public class ProximitySensor
       @NonNull AccelerometerListener accelerometerListener) {
     mContext = context;
     Trace.beginSection("ProximitySensor.Constructor");
-
-    mPocketManager = (PocketManager) context.getSystemService(Context.POCKET_SERVICE);
-        if (mPocketManager != null) {
-            mPocketManager.addCallback(mPocketCallback);
-        }
 
     mPrefs = PreferenceManager.getDefaultSharedPreferences(context);
     final boolean mIsProximitySensorDisabled = mPrefs.getBoolean(PREF_KEY_DISABLE_PROXI_SENSOR, false);
@@ -370,15 +351,15 @@ public class ProximitySensor
     LogUtil.i(
         "ProximitySensor.updateProximitySensorMode",
         "screenOnImmediately: %b, dialPadVisible: %b, "
-            + "offHook: %b, horizontal: %b, uiShowing: %b, audioRoute: %s, deviceInPocket: %b",
+            + "offHook: %b, horizontal: %b, uiShowing: %b, audioRoute: %s",
         screenOnImmediately,
         dialpadVisible,
         isPhoneOffhook,
         orientation == AccelerometerListener.ORIENTATION_HORIZONTAL,
         uiShowing,
-        CallAudioState.audioRouteToString(audioRoute), mIsDeviceInPocket);
+        CallAudioState.audioRouteToString(audioRoute));
 
-    if ((isPhoneOffhook || (hasIncomingCall && proxSpeakerIncallOnly() && !mIsDeviceInPocket)) && !screenOnImmediately) {
+    if ((isPhoneOffhook || (hasIncomingCall && proxSpeakerIncallOnly())) && !screenOnImmediately) {
       LogUtil.v("ProximitySensor.updateProximitySensorMode", "turning on proximity sensor");
       // Phone is in use!  Arrange for the screen to turn off
       // automatically when the sensor detects a close object.
