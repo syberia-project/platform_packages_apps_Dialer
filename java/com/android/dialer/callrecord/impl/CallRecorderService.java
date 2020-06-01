@@ -23,11 +23,8 @@ import android.content.SharedPreferences;
 import android.content.pm.PackageManager;
 import android.media.MediaRecorder;
 import android.media.MediaScannerConnection;
-import android.media.MediaScannerConnection.MediaScannerConnectionClient;
-import android.net.Uri;
 import android.os.IBinder;
 import android.os.RemoteException;
-import android.os.SystemProperties;
 import android.text.TextUtils;
 import android.provider.Settings;
 import android.util.Log;
@@ -54,9 +51,6 @@ public class CallRecorderService extends Service {
   private MediaRecorder mMediaRecorder = null;
   private RecorderState mState = RecorderState.IDLE;
   private CallRecording mCurrentRecording = null;
-  private MediaScannerConnectionClient mClient;
-
-  private static final String AUDIO_SOURCE_PROPERTY = "persist.call_recording.src";
 
   private SimpleDateFormat DATE_FORMAT = new SimpleDateFormat("yyMMdd_HHmmssSSS");
 
@@ -75,7 +69,6 @@ public class CallRecorderService extends Service {
       String fileName = generateFilename(phoneNumber);
       mCurrentRecording = new CallRecording(phoneNumber, creationTime,
           fileName, System.currentTimeMillis());
-          mClient = new MediaScanner(getApplicationContext());
       return startRecordingInternal(mCurrentRecording.getFile());
     }
 
@@ -101,8 +94,7 @@ public class CallRecorderService extends Service {
   }
 
   private int getAudioSource() {
-    int defaultValue = getResources().getInteger(R.integer.call_recording_audio_source);
-    return SystemProperties.getInt(AUDIO_SOURCE_PROPERTY, defaultValue);
+    return getResources().getInteger(R.integer.call_recording_audio_source);
   }
 
   private int getAudioFormatChoice() {
@@ -207,34 +199,10 @@ public class CallRecorderService extends Service {
       } catch (IllegalStateException e) {
         Log.e(TAG, "Exception closing media recorder", e);
       }
-      ((MediaScanner)mClient).connectAndScan(mCurrentRecording.getFile().getAbsolutePath());
+      MediaScannerConnection.scanFile(this,
+          new String[] { mCurrentRecording.fileName }, null, null);
       mMediaRecorder = null;
       mState = RecorderState.IDLE;
-    }
-  }
-
-  private final class MediaScanner implements MediaScannerConnectionClient {
-
-    private String mFileName;
-    private MediaScannerConnection mConnection;
-
-    public MediaScanner(Context ctx) {
-      mConnection = new MediaScannerConnection(ctx, this);
-    }
-
-    @Override
-    public void onMediaScannerConnected() {
-      mConnection.scanFile(mFileName, null);
-    }
-
-    @Override
-    public void onScanCompleted(String path, Uri uri) {
-      mConnection.disconnect();
-    }
-
-    public void connectAndScan(String filename) {
-      this.mFileName = filename;
-      mConnection.connect();
     }
   }
 
