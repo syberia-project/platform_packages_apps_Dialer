@@ -206,8 +206,8 @@ public class ProximitySensor
       updateProximitySensorMode();
     }
      if (hasIncomingCall) {
-      updateProxRing();
       answerProx(isProxSensorNear);
+      updateProxRing();
       updateProximitySensorMode();
     }
   }
@@ -232,8 +232,8 @@ public class ProximitySensor
             isProxSensorNear = true;
         }
      Log.i(this, "Proximity sensor changed");
-     setProxSpeaker(isProxSensorFar);
      answerProx(isProxSensorNear);
+     setProxSpeaker(isProxSensorFar);
   }
    @Override
   public void onAccuracyChanged(Sensor sensor, int accuracy) {
