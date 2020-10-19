@@ -1,5 +1,6 @@
 /*
  * Copyright (C) 2016 The Android Open Source Project
+ * Copyright (C) 2020 The LineageOS Project
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,8 +17,6 @@
 
 package com.android.dialer.callrecord;
 
-import android.annotation.NonNull;
-import android.annotation.Nullable;
 import android.annotation.TargetApi;
 import android.content.ContentResolver;
 import android.content.Context;
@@ -26,6 +25,8 @@ import android.net.Uri;
 import android.os.Build;
 import android.os.Environment;
 import android.provider.MediaStore;
+import android.support.annotation.NonNull;
+import android.support.annotation.Nullable;
 import android.text.TextUtils;
 import android.util.SparseArray;
 
@@ -35,7 +36,7 @@ import com.android.dialer.common.concurrent.DialerExecutor.Worker;
 import com.android.dialer.common.concurrent.DialerExecutorFactory;
 import com.android.voicemail.impl.mail.utils.LogUtils;
 
-import libcore.io.IoUtils;
+import org.apache.commons.io.IOUtils;
 
 import java.io.File;
 import java.io.IOException;
@@ -113,7 +114,7 @@ public class CallRecordingAutoMigrator {
         LogUtils.w(TAG, "Failed migrating call recording " + recording, e);
       } finally {
         if (os != null) {
-          IoUtils.closeQuietly(os);
+          IOUtils.closeQuietly(os);
         }
       }
     }
