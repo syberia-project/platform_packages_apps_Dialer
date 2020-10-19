@@ -18,10 +18,12 @@ package com.android.dialer.app.settings;
 import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
+import android.hardware.SensorManager;
 import android.net.Uri;
 import android.os.Build.VERSION;
 import android.os.Build.VERSION_CODES;
 import android.os.Bundle;
+import android.os.PowerManager;
 import android.os.UserManager;
 import android.preference.PreferenceManager;
 import android.provider.Settings;
@@ -43,6 +45,9 @@ import com.android.dialer.proguard.UsedByReflection;
 import com.android.dialer.util.PermissionsUtil;
 import com.android.dialer.voicemail.settings.VoicemailSettingsFragment;
 import com.android.voicemail.VoicemailClient;
+
+import static android.hardware.Sensor.TYPE_PROXIMITY;
+
 import java.util.List;
 
 /** Activity for dialer settings. */
@@ -102,8 +107,16 @@ public class DialerSettingsActivity extends AppCompatPreferenceActivity {
 
     Header soundSettingsHeader = new Header();
     soundSettingsHeader.titleRes = R.string.sounds_and_vibration_title;
+    soundSettingsHeader.fragment = SoundSettingsFragment.class.getName();
     soundSettingsHeader.id = R.id.settings_header_sounds_and_vibration;
     target.add(soundSettingsHeader);
+
+    if (showSensorOptions()) {
+      Header sensorSettingsHeader = new Header();
+      sensorSettingsHeader.titleRes = R.string.sensor_settings_titile;
+      sensorSettingsHeader.fragment = SensorSettingsFragment.class.getName();
+      target.add(sensorSettingsHeader);
+    }
 
     Header quickResponseSettingsHeader = new Header();
     Intent quickResponseSettingsIntent =
@@ -114,6 +127,13 @@ public class DialerSettingsActivity extends AppCompatPreferenceActivity {
 
     TelephonyManager telephonyManager =
         (TelephonyManager) getSystemService(Context.TELEPHONY_SERVICE);
+
+    if (isSpeakerAllowed()) {
+        final Header speakerSettingsHeader = new Header();
+        speakerSettingsHeader.titleRes = R.string.speaker_settings_label;
+        speakerSettingsHeader.fragment = SpeakerSettingsFragment.class.getName();
+        target.add(speakerSettingsHeader);
+    }
 
     // "Call Settings" (full settings) is shown if the current user is primary user and there
     // is only one SIM. Otherwise, "Calling accounts" is shown.
@@ -171,6 +191,11 @@ public class DialerSettingsActivity extends AppCompatPreferenceActivity {
           new Intent("com.android.dialer.app.settings.SHOW_ASSISTED_DIALING_SETTINGS");
       target.add(assistedDialingSettingsHeader);
     }
+
+    Header OtherSettingsHeader = new Header();
+    OtherSettingsHeader.titleRes = R.string.other_settings_label;
+    OtherSettingsHeader.fragment = OtherSettingsFragment.class.getName();
+    target.add(OtherSettingsHeader);
 
     if (showAbout()) {
       Header aboutPhoneHeader = new Header();
@@ -271,32 +296,22 @@ public class DialerSettingsActivity extends AppCompatPreferenceActivity {
         && getResources().getBoolean(R.bool.config_sort_order_user_changeable);
   }
 
-  /**
-   * For the "sounds and vibration" setting, we go directly to the system sound settings fragment.
-   * This helps since:
-   * <li>We don't need a separate Dialer sounds and vibrations fragment, as everything we need is
-   *     present in the system sounds fragment.
-   * <li>OEM's e.g Moto that support dual sim ring-tones no longer need to update the dialer sound
-   *     and settings fragment.
-   *
-   *     <p>For all other settings, we launch our our preferences fragment.
-   */
   @Override
   public void onHeaderClick(Header header, int position) {
     if (header.id == R.id.settings_header_sounds_and_vibration) {
-
+      // If we don't have the permission to write to system settings, go to system sound
+      // settings instead. Otherwise, perform the super implementation (which launches our
+      // own preference fragment.
       if (!Settings.System.canWrite(this)) {
         Toast.makeText(
                 this,
                 getResources().getString(R.string.toast_cannot_write_system_settings),
                 Toast.LENGTH_SHORT)
             .show();
+        startActivity(new Intent(Settings.ACTION_SOUND_SETTINGS));
+        return;
       }
-
-      startActivity(new Intent(Settings.ACTION_SOUND_SETTINGS));
-      return;
     }
-
     super.onHeaderClick(header, position);
   }
 
@@ -325,5 +340,19 @@ public class DialerSettingsActivity extends AppCompatPreferenceActivity {
   /** @return Whether the current user is the primary user. */
   private boolean isPrimaryUser() {
     return getSystemService(UserManager.class).isSystemUser();
+  }
+
+  private boolean showSensorOptions() {
+    SensorManager sm = (SensorManager) this.getSystemService(Context.SENSOR_SERVICE);
+    return sm.getDefaultSensor(TYPE_PROXIMITY) != null;
+  }
+
+  /**
+  * @return Whether proximity speakerphone is allowed
+  */
+  private boolean isSpeakerAllowed() {
+    PowerManager pm = (PowerManager) this.getSystemService(Context.POWER_SERVICE);
+    return pm.isWakeLockLevelSupported(PowerManager.PROXIMITY_SCREEN_OFF_WAKE_LOCK)
+    && getResources().getBoolean(R.bool.config_enabled_speakerprox);
   }
 }

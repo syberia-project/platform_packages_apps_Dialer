@@ -21,6 +21,9 @@ import android.annotation.SuppressLint;
 import android.app.Activity;
 import android.content.Context;
 import android.content.pm.PackageManager;
+import android.content.SharedPreferences;
+import android.graphics.Color;
+import android.preference.PreferenceManager;
 import android.os.Bundle;
 import android.os.Handler;
 import android.support.annotation.ColorInt;
@@ -54,9 +57,11 @@ import com.android.incallui.audioroute.AudioRouteSelectorDialogFragment;
 import com.android.incallui.audioroute.AudioRouteSelectorDialogFragment.AudioRouteSelectorPresenter;
 import com.android.incallui.contactgrid.ContactGridManager;
 import com.android.incallui.hold.OnHoldFragment;
+import com.android.incallui.incall.impl.ButtonController.CallRecordButtonController;
 import com.android.incallui.incall.impl.ButtonController.SpeakerButtonController;
 import com.android.incallui.incall.impl.ButtonController.UpgradeToRttButtonController;
 import com.android.incallui.incall.impl.InCallButtonGridFragment.OnButtonGridCreatedListener;
+import com.android.incallui.incall.protocol.ContactPhotoType;
 import com.android.incallui.incall.protocol.InCallButtonIds;
 import com.android.incallui.incall.protocol.InCallButtonIdsExtension;
 import com.android.incallui.incall.protocol.InCallButtonUi;
@@ -69,6 +74,7 @@ import com.android.incallui.incall.protocol.PrimaryCallState;
 import com.android.incallui.incall.protocol.PrimaryCallState.ButtonState;
 import com.android.incallui.incall.protocol.PrimaryInfo;
 import com.android.incallui.incall.protocol.SecondaryInfo;
+
 import java.util.ArrayList;
 import java.util.List;
 
@@ -94,6 +100,10 @@ public class InCallFragment extends Fragment
   private int voiceNetworkType;
   private int phoneType;
   private boolean stateRestored;
+  private View topPhoneContainer;
+
+  private static final int REQUEST_CODE_CALL_RECORD_PERMISSION = 1000;
+  private boolean isFullscreenPhoto = false;
 
   // Add animation to educate users. If a call has enriched calling attachments then we'll
   // initially show the attachment page. After a delay seconds we'll animate to the button grid.
@@ -117,7 +127,8 @@ public class InCallFragment extends Fragment
         || id == InCallButtonIds.BUTTON_MERGE
         || id == InCallButtonIds.BUTTON_MANAGE_VOICE_CONFERENCE
         || id == InCallButtonIds.BUTTON_SWAP_SIM
-        || id == InCallButtonIds.BUTTON_UPGRADE_TO_RTT;
+        || id == InCallButtonIds.BUTTON_UPGRADE_TO_RTT
+        || id == InCallButtonIds.BUTTON_RECORD_CALL;
   }
 
   @Override
@@ -149,10 +160,21 @@ public class InCallFragment extends Fragment
       @Nullable Bundle bundle) {
     LogUtil.i("InCallFragment.onCreateView", null);
     getActivity().setTheme(R.style.Theme_InCallScreen);
-    // Bypass to avoid StrictModeResourceMismatchViolation
-    final View view =
-        StrictModeUtils.bypass(
-            () -> layoutInflater.inflate(R.layout.frag_incall_voice, viewGroup, false));
+
+    SharedPreferences mPrefs = PreferenceManager.getDefaultSharedPreferences(getActivity());
+    isFullscreenPhoto = mPrefs.getBoolean("fullscreen_caller_photo", false);
+
+    int tempRes = R.layout.frag_incall_voice;
+    if(isFullscreenPhoto){
+      tempRes = R.layout.frag_incall_voice_fullscreen_photo;
+    }
+    final int res = tempRes;
+    final View view = StrictModeUtils.bypass(() -> layoutInflater.inflate(res, viewGroup, false));
+
+    if(isFullscreenPhoto){
+      topPhoneContainer = view.findViewById(R.id.incall_contactgrid_container);
+    }
+
     contactGridManager =
         new ContactGridManager(
             view,
@@ -232,6 +254,7 @@ public class InCallFragment extends Fragment
         new ButtonController.ManageConferenceButtonController(inCallScreenDelegate));
     buttonControllers.add(
         new ButtonController.SwitchToSecondaryButtonController(inCallScreenDelegate));
+    buttonControllers.add(new ButtonController.CallRecordButtonController(inCallButtonUiDelegate));
 
     inCallScreenDelegate.onInCallScreenDelegateInit(this);
     inCallScreenDelegate.onInCallScreenReady();
@@ -273,6 +296,15 @@ public class InCallFragment extends Fragment
     LogUtil.i("InCallFragment.setPrimary", primaryInfo.toString());
     setAdapterMedia(primaryInfo.multimediaData(), primaryInfo.showInCallButtonGrid());
     contactGridManager.setPrimary(primaryInfo);
+
+    if(topPhoneContainer != null){
+      boolean hasPhoto = primaryInfo.photo() != null && primaryInfo.photoType() == ContactPhotoType.CONTACT;
+      if(hasPhoto){
+        topPhoneContainer.setBackgroundColor(0x55000000);
+      } else {
+        topPhoneContainer.setBackgroundColor(Color.TRANSPARENT);
+      }
+    }
 
     if (primaryInfo.shouldShowLocation()) {
       // Hide the avatar to make room for location
@@ -464,6 +496,39 @@ public class InCallFragment extends Fragment
     ((SpeakerButtonController) getButtonController(InCallButtonIds.BUTTON_AUDIO))
         .setAudioState(audioState);
     getButtonController(InCallButtonIds.BUTTON_MUTE).setChecked(audioState.isMuted());
+  }
+
+  @Override
+  public void setCallRecordingState(boolean isRecording) {
+    ((CallRecordButtonController) getButtonController(InCallButtonIds.BUTTON_RECORD_CALL))
+        .setRecordingState(isRecording);
+  }
+
+  @Override
+  public void setCallRecordingDuration(long durationMs) {
+    ((CallRecordButtonController) getButtonController(InCallButtonIds.BUTTON_RECORD_CALL))
+        .setRecordingDuration(durationMs);
+  }
+
+  @Override
+  public void requestCallRecordingPermissions(String[] permissions) {
+    requestPermissions(permissions, REQUEST_CODE_CALL_RECORD_PERMISSION);
+  }
+
+  @Override
+  public void onRequestPermissionsResult(int requestCode,
+      @NonNull String[] permissions, @NonNull int[] grantResults) {
+    if (requestCode == REQUEST_CODE_CALL_RECORD_PERMISSION) {
+      boolean allGranted = grantResults.length > 0;
+      for (int i = 0; i < grantResults.length; i++) {
+        allGranted &= grantResults[i] == PackageManager.PERMISSION_GRANTED;
+      }
+      if (allGranted) {
+        inCallButtonUiDelegate.callRecordClicked(true);
+      }
+    } else {
+      super.onRequestPermissionsResult(requestCode, permissions, grantResults);
+    }
   }
 
   @Override

@@ -19,7 +19,7 @@
 
   <uses-sdk
       android:minSdkVersion="24"
-      android:targetSdkVersion="28"/>
+      android:targetSdkVersion="29"/>
 
   <uses-permission android:name="android.permission.CONTROL_INCALL_EXPERIENCE"/>
   <!-- We use this to disable the status bar buttons of home, back and recent
@@ -45,6 +45,9 @@
 
   <!-- Set audio selector window type TYPE_APPLICATION_OVERLAY -->
   <uses-permission android:name="android.permission.SYSTEM_ALERT_WINDOW"/>
+
+  <!-- Required when the "Enable Do Not Disturb during call" setting is enabled -->
+  <uses-permission android:name="android.permission.ACCESS_NOTIFICATION_POLICY" />
 
   <!-- Set android:taskAffinity="com.android.incallui" for all activities to ensure proper
   navigation. Otherwise system could bring up MainActivity instead, e.g. when user unmerge a

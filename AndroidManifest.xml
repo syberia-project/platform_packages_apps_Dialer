@@ -21,7 +21,7 @@
 
   <uses-sdk
     android:minSdkVersion="24"
-    android:targetSdkVersion="28"/>
+    android:targetSdkVersion="29"/>
 
   <uses-permission android:name="android.permission.CALL_PHONE"/>
   <uses-permission android:name="android.permission.READ_CONTACTS"/>
@@ -113,7 +113,8 @@
     android:name="com.android.dialer.binary.aosp.AospDialerApplication"
     android:supportsRtl="true"
     android:usesCleartextTraffic="false"
-    android:extractNativeLibs="false">
+    android:extractNativeLibs="false"
+    android:requestLegacyExternalStorage="true">
   </application>
 
 </manifest>

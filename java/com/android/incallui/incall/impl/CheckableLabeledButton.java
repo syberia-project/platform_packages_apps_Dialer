@@ -21,6 +21,8 @@ import android.content.Context;
 import android.content.res.ColorStateList;
 import android.content.res.TypedArray;
 import android.graphics.Color;
+import android.content.SharedPreferences;
+import android.preference.PreferenceManager;
 import android.graphics.PorterDuff.Mode;
 import android.graphics.drawable.Drawable;
 import android.os.Parcel;
@@ -66,6 +68,16 @@ public class CheckableLabeledButton extends LinearLayout implements Checkable {
     Drawable icon;
     CharSequence labelText;
     boolean enabled;
+
+    SharedPreferences mPrefs = PreferenceManager.getDefaultSharedPreferences(context);
+    boolean isFullscreenPhoto = mPrefs.getBoolean("fullscreen_caller_photo", false);
+    int resBackground = R.drawable.incall_button_background;
+    int resBackgroundMore = R.drawable.incall_button_background_more;
+
+    if(isFullscreenPhoto){
+      resBackground = R.drawable.incall_button_background_fullscreen_photo;
+      resBackgroundMore = R.drawable.incall_button_background_more_fullscreen_photo;
+    }
 
     backgroundMore =
         getResources().getDrawable(R.drawable.incall_button_background_more, context.getTheme());
@@ -114,7 +126,8 @@ public class CheckableLabeledButton extends LinearLayout implements Checkable {
     labelView.setLayoutParams(labelParams);
     labelView.setTextAppearance(R.style.Dialer_Incall_TextAppearance_Label);
     labelView.setText(labelText);
-    labelView.setSingleLine();
+    labelView.setSingleLine(false);
+    labelView.setMaxLines(2);
     labelView.setMaxEms(9);
     labelView.setEllipsize(TruncateAt.END);
     labelView.setGravity(Gravity.CENTER);
@@ -154,6 +167,10 @@ public class CheckableLabeledButton extends LinearLayout implements Checkable {
 
   public void setLabelText(@StringRes int stringRes) {
     labelView.setText(stringRes);
+  }
+
+  public void setLabelText(CharSequence label) {
+    labelView.setText(label);
   }
 
   /** Shows or hides a little down arrow to indicate that the button will pop up a menu. */

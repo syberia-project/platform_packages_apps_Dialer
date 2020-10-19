@@ -43,4 +43,41 @@
     android:key="@string/dtmf_tone_length_preference_key"
     android:title="@string/dtmf_tone_length_title"/>
 
+  <SwitchPreference
+    android:defaultValue="false"
+    android:key="incall_enable_dnd"
+    android:title="@string/incall_enable_dnd_title"/>
+
+  <PreferenceCategory
+    android:key="@string/call_recording_category_key"
+    android:title="@string/call_recording_category_title">
+
+    <ListPreference
+      android:key="@string/call_recording_format_key"
+      android:title="@string/call_recording_format"
+      android:summary="%s"
+      android:entries="@array/call_recording_encoder_entries"
+      android:entryValues="@array/call_recording_encoder_values"
+      android:defaultValue="0" />
+
+  <SwitchPreference
+    android:defaultValue="false"
+    android:key="@string/auto_call_recording_key"
+    android:title="@string/auto_call_recording_title"/>
+
+  </PreferenceCategory>
+
+  <PreferenceCategory
+      android:key="dialer_general_smart_category_key"
+      android:title="@string/smart_category_title"
+      android:persistent="false">
+
+      <SwitchPreference
+          android:key="button_smart_mute"
+          android:title="@string/smart_mute_title"
+          android:summary="@string/smart_mute_summary"
+          android:defaultValue="false" />
+
+  </PreferenceCategory>
+
 </PreferenceScreen>

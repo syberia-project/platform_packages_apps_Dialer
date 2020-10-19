@@ -79,6 +79,8 @@ LOCAL_SRC_FILES += $(call all-proto-files-under, $(BASE_DIR))
 LOCAL_SRC_FILES += $(call all-Iaidl-files-under, $(BASE_DIR))
 LOCAL_SRC_FILES := $(filter-out $(EXCLUDE_FILES),$(LOCAL_SRC_FILES))
 
+LOCAL_AIDL_INCLUDES := $(LOCAL_PATH)/java
+
 LOCAL_PROTOC_FLAGS := --proto_path=$(LOCAL_PATH)
 
 LOCAL_RESOURCE_DIR := $(addprefix $(LOCAL_PATH)/, $(RES_DIRS))
@@ -168,12 +170,12 @@ LOCAL_PROGUARD_ENABLED := custom
 
 LOCAL_PROGUARD_ENABLED += optimization
 
-LOCAL_SDK_VERSION := system_current
 LOCAL_MODULE_TAGS := optional
 LOCAL_PACKAGE_NAME := Dialer
 LOCAL_CERTIFICATE := shared
 LOCAL_PRIVILEGED_MODULE := true
 LOCAL_PRODUCT_MODULE := true
+LOCAL_PRIVATE_PLATFORM_APIS := true
 LOCAL_USE_AAPT2 := true
 LOCAL_REQUIRED_MODULES := privapp_whitelist_com.android.dialer
 
