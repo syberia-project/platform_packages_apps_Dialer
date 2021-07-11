@@ -1,5 +1,6 @@
+<?xml version="1.0" encoding="utf-8"?>
 <!--
-  ~ Copyright (C) 2018 The Android Open Source Project
+  ~ Copyright (C) 2012 The Android Open Source Project
   ~
   ~ Licensed under the Apache License, Version 2.0 (the "License");
   ~ you may not use this file except in compliance with the License.
@@ -13,12 +14,8 @@
   ~ See the License for the specific language governing permissions and
   ~ limitations under the License
   -->
+<!-- The colors in this file aren't configured at the theme level. -->
 <resources>
-  <!-- Essential theme colors -->
-  <color name="dialer_theme_color">#5195EA</color>
-  <color name="dialer_theme_color_20pct">#335195EA</color>
-  <color name="dialer_secondary_color">#5195EA</color>
-  <color name="dialer_ripple_color">#33ffffff</color>
-  <color name="dialer_search_bar_color">@color/google_grey_900</color>
-  <color name="settings_primary_dark">#2374CE</color>
+  <!-- Settings -->
+  <color name="dialer_settings_theme_color_dark">#1C3AA9</color>
 </resources>
